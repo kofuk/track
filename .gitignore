@@ -1,6 +1,4 @@
 /Package.csv
-*.png
-*.aux
-*.log
-*.pdf
-*.tex
+/node_modules
+/.*.vars
+!/.example.vars
