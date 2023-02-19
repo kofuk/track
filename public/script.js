@@ -94,6 +94,8 @@ const initByUUID = () => {
                     if (code) {
                         const id = code.data;
                         if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+                            document.getElementById('input-uuid').value = id;
+                            updateParams('byuuid', id);
                             doSearchByUUID(id);
                             useCamera = false;
                         }
