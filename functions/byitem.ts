@@ -8,7 +8,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         throw Error('q is not defined');
     }
 
-    const keywords = params.get('q').split(';');
+    const keywords = params.get('q').split(';').map((e) => e.toLowerCase());
 
     const criteria = [];
     for (const keyword of keywords) {
@@ -42,7 +42,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
                 id: result['properties']['id']['title'][0]['plain_text'],
                 matching_items: element[0]['plain_text'].split(';').filter((e) => {
                     for (const keyword of keywords) {
-                        if (e.includes(keyword)) {
+                        if (e.toLowerCase().includes(keyword)) {
                             return true;
                         }
                     }

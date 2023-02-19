@@ -27,12 +27,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         }),
     }).then((resp) => resp.json());
 
-    if (resp['results'].length !== 1) {
-        throw Error('len(results) is not 1');
+    if (resp['results'].length > 1) {
+        throw Error('len(results) is greater than 1');
     }
 
     const items =
-        resp['results'][0]['properties']['items']['rich_text'][0]['plain_text'].split(';');
+        resp['results'].length === 0 || resp['results'][0]['properties']['items']['rich_text'].length === 0
+            ? []
+            : resp['results'][0]['properties']['items']['rich_text'][0]['plain_text'].split(';');
 
     return new Response(JSON.stringify(items), {
         headers: {
