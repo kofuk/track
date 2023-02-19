@@ -19,20 +19,21 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         },
         body: JSON.stringify({
             filter: {
-                property: 'id',
-                title: {
+                property: 'type',
+                select: {
                     equals: query,
                 },
             },
         }),
     }).then((resp) => resp.json());
 
-    if (resp['results'].length !== 1) {
-        throw Error('len(results) is not 1');
+    const items = [];
+    for (const result of resp['results']) {
+        const element = result['properties']['items']['rich_text'];
+        if (element.length !== 0) {
+            items.push(...element[0]['plain_text'].split(';'));
+        }
     }
-
-    const items =
-        resp['results'][0]['properties']['items']['rich_text'][0]['plain_text'].split(';');
 
     return new Response(JSON.stringify(items), {
         headers: {
