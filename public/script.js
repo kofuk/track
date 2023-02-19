@@ -37,6 +37,8 @@ const doSearchByUUID = (query) => {
         });
 };
 
+
+
 const initByUUID = () => {
     const uuid_form = document.getElementById('byuuid');
     uuid_form?.addEventListener('submit', (e) => {
@@ -47,6 +49,69 @@ const initByUUID = () => {
         updateParams('byuuid', query);
 
         doSearchByUUID(query);
+    });
+
+    let useCamera = false;
+
+    document.getElementById('qr').addEventListener('click', (event) => {
+        useCamera = !useCamera;
+        if (!useCamera) {
+            return;
+        }
+
+        const video = document.createElement('video');
+        video.style.position = 'absolute';
+        video.style.top = 0;
+        video.style.left = 0;
+        video.style.width = '100%';
+        document.body.appendChild(video);
+
+        const canvas = document.createElement('canvas');
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then((strm) => {
+                video.srcObject = strm;
+                video.setAttribute('playsinline', true);
+                video.play();
+
+                const processFrame = () => {
+                    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+                        requestAnimationFrame(processFrame);
+                        return;
+                    }
+
+                    const width = video.videoWidth;
+                    const height = video.videoHeight;
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0, width, height);
+                    const image = ctx.getImageData(0, 0, width, height);
+                    const code = jsQR(image.data, width, height, {
+                        inversionAttempts: 'dontInvert'
+                    });
+
+                    if (code) {
+                        const id = code.data;
+                        if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+                            doSearchByUUID(id);
+                            useCamera = false;
+                        }
+                    }
+
+                    if (!useCamera) {
+                        video.remove();
+                        for (const track of strm.getTracks()) {
+                            track.stop();
+                        }
+                        return;
+                    }
+
+                    requestAnimationFrame(processFrame);
+                };
+
+                requestAnimationFrame(processFrame);
+            });
     });
 };
 
